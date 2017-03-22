@@ -3,7 +3,6 @@ extern crate graphics;
 extern crate glutin_window;
 extern crate opengl_graphics;
 extern crate rand;
-
 pub mod tetris;
 pub mod piece;
 
@@ -132,7 +131,7 @@ fn main() {
     // Create an Glutin window.
     let mut window: Window = WindowSettings::new(
             "spinning-square",
-            [REAL_WIDTH*CELL_SIZE, REAL_HEIGHT*CELL_SIZE]
+            [WIDTH*CELL_SIZE, HEIGHT*CELL_SIZE]
         )
         .opengl(opengl)
         .exit_on_esc(true)
@@ -149,7 +148,7 @@ fn main() {
         matrix: Matrix::new()
     };
 
-    let mut events = Events::new(EventSettings::new());
+    let mut events = Events::new(EventSettings::new()).ups(600);
     while let Some(e) = events.next(&mut window) {
         if let Some(Button::Keyboard(key)) = e.press_args() {
             app.on_press(key);
