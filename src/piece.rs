@@ -52,6 +52,7 @@ pub const PIECE_S: [[f64; 4]; 4] = [
 pub const PIECES: [[[f64; 4]; 4]; 7] = [PIECE_T, PIECE_J, PIECE_Z, PIECE_O, PIECE_S, PIECE_L, PIECE_I];
 
 pub struct Piece {
+    pub id: u32,
     pub origin: u32,
     pub offset: [[f64; 4];4],
     pub orientation: u32,
@@ -60,12 +61,14 @@ pub struct Piece {
     pub rot_r: bool,
     pub soft_drop: bool,
     pub mov_left: bool,
-    pub mov_right: bool
+    pub mov_right: bool,
+    pub hard_drop: bool
 }
 
 impl Piece {
-    pub fn new(orientation: u32, offsets: [[f64; 4]; 4], color: [f32; 4]) -> Piece {
+    pub fn new(id: u32, orientation: u32, offsets: [[f64; 4]; 4], color: [f32; 4]) -> Piece {
         Piece {
+            id: id + 1,
             origin: SPAWN_POSITION,
             offset: offsets,
             orientation: orientation,
@@ -74,25 +77,24 @@ impl Piece {
             rot_r: false,
             soft_drop: false,
             mov_left: false,
-            mov_right: false
+            mov_right: false,
+            hard_drop: false
         }
     }
 
 
     pub fn draw(&mut self, c: graphics::Context, gl: &mut opengl_graphics::GlGraphics) {
         for i in 0..self.offset[self.orientation as usize].len() {
-            //if piece.origin as f64 + piece.offset[piece.orientation as usize][i as usize] < 231.0 {
-                let x = ((self.origin as f64 + self.offset[self.orientation as usize][i as usize]) % REAL_WIDTH as f64).floor() * CELL_SIZE as f64;
-                let y = (21.0 - ((self.origin as f64 + self.offset[self.orientation as usize][i as usize]) / REAL_WIDTH as f64).floor()) * CELL_SIZE as f64;
+                let x = (((self.origin as f64 + self.offset[self.orientation as usize][i as usize]) % REAL_WIDTH as f64) - 1.0).floor() * CELL_SIZE as f64;
+                let y = (20.0 - ((self.origin as f64 + self.offset[self.orientation as usize][i as usize]) / REAL_WIDTH as f64).floor()) * CELL_SIZE as f64;
                 let s = rectangle::square(x, y, CELL_SIZE as f64);
                 rectangle(self.color, s, c.transform, gl);
-            //}
         }
     }
 
     pub fn lock(&mut self, m: &mut Matrix) {
         for i in 0..self.offset[self.orientation as usize].len() {
-            m.add_piece(self.origin as i32 + self.offset[self.orientation as usize][i] as i32, 2);
+            m.add_piece(self.origin as i32 + self.offset[self.orientation as usize][i] as i32, self.id as i32);
         }
         m.clear_lines();
         self.new_piece();
@@ -104,13 +106,23 @@ impl Piece {
             self.orientation = (self.orientation + 3) % self.offset[self.orientation as usize].len() as u32
         }
     }
-    pub fn move_down(&mut self, m: &mut Matrix) {
+    pub fn move_down(&mut self, m: &mut Matrix) -> bool {
         if self.can_move(m, -11) {
             self.origin -= 11;
+            return false
         } else {
             self.lock(m);
             self.new_piece();
+            return true
         }
+    }
+
+    pub fn hard_drop(&mut self, m: &mut Matrix) {
+        while self.can_move(m, -11) {
+            self.origin -= 11;
+        }
+        self.lock(m);
+        self.new_piece();
     }
 
     pub fn can_move(&mut self, m: &mut Matrix, val: i32) -> bool {
@@ -139,8 +151,9 @@ impl Piece {
 
     pub fn new_piece(&mut self) {
         let pcs = &PIECES;
-        let choice = rand::thread_rng().choose(pcs).unwrap();
-        self.offset = *choice;
+        let choice = rand::thread_rng().gen_range(0, 7);
+        self.offset = pcs[choice];
+        self.id = choice as u32 + 1;
         self.origin = SPAWN_POSITION;
         self.orientation = 0;
     }

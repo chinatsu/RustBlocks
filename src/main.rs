@@ -56,13 +56,7 @@ impl App {
     fn update(&mut self, args: &UpdateArgs) {
 
         if self.piece.soft_drop {
-            self.piece.move_down(&mut self.matrix)
-        }
-        if self.piece.rot_l {
-            self.piece.rotate(true);
-        }
-        if self.piece.rot_r {
-            self.piece.rotate(false);
+            let _ = self.piece.move_down(&mut self.matrix);
         }
         if self.piece.mov_left {
             if self.piece.can_move(&mut self.matrix, -1) {
@@ -88,10 +82,22 @@ impl App {
                 self.piece.mov_right = true;
             }
             Key::X => {
-                self.piece.rot_l = true;
+                if !self.piece.rot_l {
+                    self.piece.rotate(true);
+                    self.piece.rot_l = true;
+                }
             }
             Key::Z => {
-                self.piece.rot_r = true;
+                if !self.piece.rot_r {
+                    self.piece.rotate(false);
+                    self.piece.rot_r = true;
+                }
+            }
+            Key::Space => {
+                if !self.piece.hard_drop {
+                    self.piece.hard_drop(&mut self.matrix);
+                    self.piece.hard_drop = true;
+                }
             }
             _ => {}
         }
@@ -113,6 +119,9 @@ impl App {
             Key::Z => {
                 self.piece.rot_r = false;
             }
+            Key::Space => {
+                self.piece.hard_drop = false;
+            }
             _ => {}
         }
     }
@@ -125,7 +134,7 @@ fn main() {
     // Create an Glutin window.
     let mut window: Window = WindowSettings::new(
             "spinning-square",
-            [REAL_WIDTH*CELL_SIZE, REAL_HEIGHT*CELL_SIZE]
+            [WIDTH*CELL_SIZE, HEIGHT*CELL_SIZE]
         )
         .opengl(opengl)
         .exit_on_esc(true)
@@ -133,8 +142,8 @@ fn main() {
         .unwrap();
 
     let pcs = &PIECES;
-    let choice = rand::thread_rng().choose(pcs).unwrap();
-    let p = Piece::new(0, *choice, [1.0, 1.0, 1.0, 0.5]);
+    let choice = rand::thread_rng().gen_range(0, 7);
+    let p = Piece::new(choice, 0, pcs[choice as usize], [1.0, 1.0, 1.0, 0.5]);
     // Create a new game and run it.
     let mut app = App {
         gl: GlGraphics::new(opengl),

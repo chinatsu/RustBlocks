@@ -39,7 +39,8 @@ impl Matrix {
     }
 
     pub fn clear_lines(&mut self) {
-        for i in 0..TOP_ROW as usize {
+        let mut i = TOP_ROW as usize;
+        while i > 0 {
             if self.state[i] == -11 {
                 for j in i..TOP_ROW as usize {
                     self.state[j] = self.state[j + 11];
@@ -51,13 +52,14 @@ impl Matrix {
                     }
                 }
             }
+            i -= 1;
         }
     }
 
     pub fn draw(&mut self, c: graphics::Context, gl: &mut opengl_graphics::GlGraphics) {
         for i in 0..231 as u32 {
             if self.state[i as usize] > 0 {
-                let x = (i as f64 % REAL_WIDTH as f64).floor() * CELL_SIZE as f64;
+                let x = ((i as f64 % REAL_WIDTH as f64).floor() - 1.0) * CELL_SIZE as f64;
                 let y = (21.0 - (i as f64 / REAL_WIDTH as f64)).floor() * CELL_SIZE as f64;
                 let s = rectangle::square(x, y, CELL_SIZE as f64);
                 rectangle(self.get_color(i as usize), s, c.transform, gl);
