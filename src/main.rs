@@ -38,6 +38,7 @@ impl App {
         }
         let ref mut piece = self.piece;
         let ref mut matrix = self.matrix;
+        let pos = piece.origin;
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
             clear(BG, gl);
@@ -47,9 +48,16 @@ impl App {
             for col in columns {
                 line(GREEN, 0.5, col, c.transform, gl);
             }
-            piece.draw(c, gl);
-            matrix.draw(c, gl);
+            // Draw ghost
+            while piece.can_move(matrix, -11) {
+                piece.origin -= 11;
+            }
+            piece.draw(8, c, gl);
+            piece.origin = pos;
 
+            let id = piece.id as i32;
+            piece.draw(id, c, gl);
+            matrix.draw(c, gl);
         });
     }
 

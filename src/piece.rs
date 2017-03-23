@@ -81,12 +81,12 @@ impl Piece {
     }
 
 
-    pub fn draw(&mut self, c: graphics::Context, gl: &mut opengl_graphics::GlGraphics) {
+    pub fn draw(&mut self, id: i32, c: graphics::Context, gl: &mut opengl_graphics::GlGraphics) {
         for i in 0..self.offset[self.orientation as usize].len() {
                 let x = (((self.origin as f64 + self.offset[self.orientation as usize][i as usize]) % REAL_WIDTH as f64) - 1.0).floor() * CELL_SIZE as f64;
                 let y = (20.0 - ((self.origin as f64 + self.offset[self.orientation as usize][i as usize]) / REAL_WIDTH as f64).floor()) * CELL_SIZE as f64;
                 let s = rectangle::square(x, y, CELL_SIZE as f64);
-                rectangle(self.color, s, c.transform, gl);
+                rectangle(get_color(id), s, c.transform, gl);
         }
     }
 
@@ -166,4 +166,41 @@ impl Piece {
         self.origin = SPAWN_POSITION;
         self.orientation = 0;
     }
+}
+
+pub fn get_color(cell: i32) -> [f32; 4] {
+    let c: [f32; 4];
+    match cell {
+        0 => {
+            c = [0.0, 0.0, 0.0, 0.0];
+        }
+        1 => {
+            c = [1.0, 1.0, 1.0, 1.0];
+        }
+        2 => {
+            c = [0.0, 0.0, 1.0, 1.0];
+        }
+        3 => {
+            c = [1.0, 0.0, 0.0, 1.0];
+        }
+        4 => {
+            c = [1.0, 1.0, 0.0, 1.0];
+        }
+        5 => {
+            c = [0.0, 1.0, 0.0, 1.0];
+        }
+        6 => {
+            c = [1.0, 0.0, 1.0, 1.0];
+        }
+        7 => {
+            c = [0.0, 1.0, 1.0, 1.0];
+        }
+        8 => {
+            c = [1.0, 1.0, 1.0, 0.3];
+        }
+        _ => {
+            c = [0.0, 0.0, 0.0, 0.0];
+        }
+    }
+    c
 }

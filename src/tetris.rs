@@ -1,6 +1,7 @@
 extern crate graphics;
 extern crate opengl_graphics;
 use graphics::*;
+use piece::*;
 
 
 pub const WIDTH: u32 = 10;
@@ -62,44 +63,10 @@ impl Matrix {
                 let x = ((i as f64 % REAL_WIDTH as f64).floor() - 1.0) * CELL_SIZE as f64;
                 let y = (21.0 - (i as f64 / REAL_WIDTH as f64)).floor() * CELL_SIZE as f64;
                 let s = rectangle::square(x, y, CELL_SIZE as f64);
-                rectangle(self.get_color(i as usize), s, c.transform, gl);
+                rectangle(get_color(self.state[i as usize]), s, c.transform, gl);
 
             }
         }
-    }
-
-    fn get_color(&mut self, cell: usize) -> [f32; 4] {
-        let c: [f32; 4];
-        match self.state[cell] {
-            0 => {
-                c = [0.0, 0.0, 0.0, 0.0];
-            }
-            1 => {
-                c = [1.0, 1.0, 1.0, 1.0];
-            }
-            2 => {
-                c = [0.0, 0.0, 1.0, 1.0];
-            }
-            3 => {
-                c = [1.0, 0.0, 0.0, 1.0];
-            }
-            4 => {
-                c = [1.0, 1.0, 0.0, 1.0];
-            }
-            5 => {
-                c = [0.0, 1.0, 0.0, 1.0];
-            }
-            6 => {
-                c = [1.0, 0.0, 1.0, 1.0];
-            }
-            7 => {
-                c = [0.0, 1.0, 1.0, 1.0];
-            }
-            _ => {
-                c = [0.0, 0.0, 0.0, 0.0];
-            }
-        }
-        c
     }
 
     fn clear_matrix(&mut self) {
