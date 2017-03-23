@@ -104,43 +104,15 @@ impl Piece {
             self.orientation = new_orientation;
             return
         }
-        self.origin -= 1;
-        if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
-            return
-        }
-        self.origin += 2;
-        if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
-            return
-        }
-        self.origin -= 12;
-        if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
-            return
-        }
-        self.origin -= 1;
-        if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
-            return
-        }
-        self.origin += 2;
-        if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
-            return
-        }
-        self.origin += 8;
-        if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
-            return
-        }
-        self.origin += 4;
-        if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
-            return
+        let rotate_checks: [i32; 7] = [-1, 2, -12, -1, 2, 8, 4];
+        for check in rotate_checks.iter() {
+            self.origin = (self.origin as i32 + check) as u32;
+            if self.can_rotate(m, val) {
+                self.orientation = new_orientation;
+                return
+            }
         }
         self.origin -= 2;
-        self.orientation = old_orientation;
     }
 
     pub fn move_down(&mut self, m: &mut Matrix) -> bool {
