@@ -18,7 +18,11 @@ use rand::Rng;
 pub struct App {
     gl: GlGraphics, // OpenGL drawing backend.
     piece: Piece,
-    matrix: Matrix
+    matrix: Matrix,
+    das_right: u64,
+    moved_right: bool,
+    das_left: u64,
+    moved_left: bool
 }
 
 impl App {
@@ -67,13 +71,31 @@ impl App {
             let _ = self.piece.move_down(&mut self.matrix);
         }
         if self.piece.mov_left {
-            if self.piece.can_move(&mut self.matrix, -1) {
-                self.piece.origin -= 1;
+            if !self.moved_left {
+                if self.piece.can_move(&mut self.matrix, -1) {
+                    self.piece.origin -= 1;
+                }
+                self.moved_left = true;
+            }
+            self.das_left += 1;
+            if self.das_left > 100 {
+                if self.piece.can_move(&mut self.matrix, -1) {
+                    self.piece.origin -= 1;
+                }
             }
         }
         if self.piece.mov_right {
-            if self.piece.can_move(&mut self.matrix, 1) {
-                self.piece.origin += 1;
+            if !self.moved_right {
+                if self.piece.can_move(&mut self.matrix, 1) {
+                    self.piece.origin += 1;
+                }
+                self.moved_right = true;
+            }
+            self.das_right += 1;
+            if self.das_right > 100 {
+                if self.piece.can_move(&mut self.matrix, 1) {
+                    self.piece.origin += 1;
+                }
             }
         }
     }
@@ -123,9 +145,13 @@ impl App {
             }
             Key::Left => {
                 self.piece.mov_left = false;
+                self.das_left = 0;
+                self.moved_left = false;
             }
             Key::Right => {
                 self.piece.mov_right = false;
+                self.das_right = 0;
+                self.moved_right = false;
             }
             Key::X => {
                 self.piece.rot = false;
@@ -150,7 +176,7 @@ fn main() {
 
     // Create an Glutin window.
     let mut window: Window = WindowSettings::new(
-            "spinning-square",
+            "rustblocks",
             [WIDTH*CELL_SIZE, HEIGHT*CELL_SIZE]
         )
         .opengl(opengl)
@@ -161,14 +187,17 @@ fn main() {
     let pcs = &PIECES;
     let choice = rand::thread_rng().gen_range(0, 7);
     let p = Piece::new(choice, 0, pcs[choice as usize], [1.0, 1.0, 1.0, 0.5]);
-    // Create a new game and run it.
     let mut app = App {
         gl: GlGraphics::new(opengl),
         piece: p,
-        matrix: Matrix::new()
+        matrix: Matrix::new(),
+        das_right: 0,
+        moved_right: false,
+        das_left: 0,
+        moved_left: false
     };
 
-    let mut events = Events::new(EventSettings::new()).ups(10);
+    let mut events = Events::new(EventSettings::new()).ups(1000);
     while let Some(e) = events.next(&mut window) {
         if let Some(Button::Keyboard(key)) = e.press_args() {
             app.on_press(key);

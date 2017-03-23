@@ -33,8 +33,8 @@ pub const PIECE_L: [[f64; 4]; 4] = [
 pub const PIECE_O: [[f64; 4]; 4] = [
     [-12.0, -11.0, -1.0, 0.0],
     [-12.0, -11.0, -1.0, 0.0],
-    [-12.0, -11.0, -1.0, 0.0],
-    [-12.0, -11.0, -1.0, 0.0]
+    [10.0, 11.0, -1.0, 0.0],
+    [10.0, 11.0, -1.0, 0.0]
 ];
 pub const PIECE_T: [[f64; 4]; 4] = [
     [-11.0, -1.0, 0.0, 1.0],
@@ -49,7 +49,7 @@ pub const PIECE_S: [[f64; 4]; 4] = [
     [-22.0, -12.0, -1.0, -11.0]
 ];
 
-pub const PIECES: [[[f64; 4]; 4]; 7] = [PIECE_T, PIECE_J, PIECE_Z, PIECE_O, PIECE_S, PIECE_L, PIECE_I];
+pub const PIECES: [[[f64; 4]; 4]; 7] = [PIECE_I, PIECE_O, PIECE_T, PIECE_S, PIECE_Z, PIECE_J, PIECE_L];
 
 pub struct Piece {
     pub id: u32,
@@ -61,7 +61,9 @@ pub struct Piece {
     pub soft_drop: bool,
     pub mov_left: bool,
     pub mov_right: bool,
-    pub hard_drop: bool
+    pub hard_drop: bool,
+    pub surface_time: u64,
+    pub drop_time: u64
 }
 
 impl Piece {
@@ -76,7 +78,9 @@ impl Piece {
             soft_drop: false,
             mov_left: false,
             mov_right: false,
-            hard_drop: false
+            hard_drop: false,
+            surface_time: 0,
+            drop_time: 0
         }
     }
 
@@ -97,7 +101,8 @@ impl Piece {
         m.clear_lines();
         self.new_piece();
     }
-    pub fn rotate(&mut self, m: &mut Matrix, val: i32) {
+
+    pub fn rotate(&mut self, m: &Matrix, val: i32) {
         let old_orientation = self.orientation;
         let new_orientation = (self.orientation + val as u32) % self.offset[self.orientation as usize].len() as u32;
         if self.can_rotate(m, val) {
@@ -117,11 +122,18 @@ impl Piece {
 
     pub fn move_down(&mut self, m: &mut Matrix) -> bool {
         if self.can_move(m, -11) {
-            self.origin -= 11;
+            self.drop_time += 1;
+            if self.drop_time % 10 == 0 {
+                self.origin -= 11;
+            }
             return false
         } else {
-            self.lock(m);
-            self.new_piece();
+            self.surface_time += 1;
+            if self.surface_time > 1250 {
+                    self.lock(m);
+                    self.new_piece();
+                    self.surface_time = 0;
+            }
             return true
         }
     }
@@ -138,6 +150,9 @@ impl Piece {
         for i in 0..self.offset[self.orientation as usize].len() {
             let index = self.origin as i32 + val + self.offset[self.orientation as usize][i as usize] as i32;
             if index <= 11 {
+                return false
+            }
+            if index == ARRAY_SIZE as i32 {
                 return false
             }
             if m.state[index as usize] != 0 {
@@ -175,25 +190,25 @@ pub fn get_color(cell: i32) -> [f32; 4] {
             c = [0.0, 0.0, 0.0, 0.0];
         }
         1 => {
-            c = [1.0, 1.0, 1.0, 1.0];
+            c = [0.0, 1.0, 1.0, 1.0];
         }
         2 => {
-            c = [0.0, 0.0, 1.0, 1.0];
-        }
-        3 => {
-            c = [1.0, 0.0, 0.0, 1.0];
-        }
-        4 => {
             c = [1.0, 1.0, 0.0, 1.0];
         }
+        3 => {
+            c = [1.0, 0.0, 0.8, 1.0];
+        }
+        4 => {
+            c = [0.0, 0.8, 0.0, 1.0];
+        }
         5 => {
-            c = [0.0, 1.0, 0.0, 1.0];
+            c = [1.0, 0.0, 0.0, 1.0];
         }
         6 => {
-            c = [1.0, 0.0, 1.0, 1.0];
+            c = [0.0, 0.0, 1.0, 1.0];
         }
         7 => {
-            c = [0.0, 1.0, 1.0, 1.0];
+            c = [0.8, 0.5, 0.0, 1.0];
         }
         8 => {
             c = [1.0, 1.0, 1.0, 0.3];
