@@ -35,10 +35,10 @@ impl App {
         let mut lines: Vec<[f64; 4]> = vec![];
         let mut columns: Vec<[f64; 4]> = vec![];
         for x in 0..(args.height/CELL_SIZE) {
-            if x < 10 {
+            if x < 11 {
                 columns.push([(x*CELL_SIZE) as f64, 0.0, (x*CELL_SIZE) as f64, args.height as f64]);
             }
-            lines.push([0.0, (x*CELL_SIZE) as f64, args.width as f64, (x*CELL_SIZE) as f64]);
+            lines.push([0.0, (x*CELL_SIZE) as f64, (WIDTH * CELL_SIZE) as f64, (x*CELL_SIZE) as f64]);
         }
         let ref mut piece = self.piece;
         let ref mut matrix = self.matrix;
@@ -62,6 +62,7 @@ impl App {
             let id = piece.id as i32;
             piece.draw(id, c, gl);
             matrix.draw(c, gl);
+            piece.draw_next(c, gl);
         });
     }
 
@@ -78,7 +79,7 @@ impl App {
                 self.moved_left = true;
             }
             self.das_left += 1;
-            if self.das_left > 100 {
+            if self.das_left > 150 {
                 if self.piece.can_move(&mut self.matrix, -1) {
                     self.piece.origin -= 1;
                 }
@@ -92,7 +93,7 @@ impl App {
                 self.moved_right = true;
             }
             self.das_right += 1;
-            if self.das_right > 100 {
+            if self.das_right > 150 {
                 if self.piece.can_move(&mut self.matrix, 1) {
                     self.piece.origin += 1;
                 }
@@ -177,7 +178,7 @@ fn main() {
     // Create an Glutin window.
     let mut window: Window = WindowSettings::new(
             "rustblocks",
-            [WIDTH*CELL_SIZE, HEIGHT*CELL_SIZE]
+            [(WIDTH+10)*CELL_SIZE, HEIGHT*CELL_SIZE]
         )
         .opengl(opengl)
         .exit_on_esc(true)

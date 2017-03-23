@@ -109,6 +109,15 @@ impl Piece {
                 rectangle(get_color(id), s, c.transform, gl);
         }
     }
+    pub fn draw_next(&mut self, c: graphics::Context, gl: &mut opengl_graphics::GlGraphics) {
+        let next_piece = &PIECES[self.next_index][0];
+        for i in 0..next_piece.len() {
+                let x = (((206.0 + next_piece[i as usize]) % REAL_WIDTH as f64) + 5.0).floor() * CELL_SIZE as f64;
+                let y = (20.0 - ((206.0 + next_piece[i as usize]) / REAL_WIDTH as f64).floor()) * CELL_SIZE as f64;
+                let s = rectangle::square(x, y, CELL_SIZE as f64);
+                rectangle(get_color(self.next_index as i32 + 1), s, c.transform, gl);
+        }
+    }
 
     pub fn lock(&mut self, m: &mut Matrix) {
         for i in 0..self.offset[self.orientation as usize].len() {
@@ -147,7 +156,6 @@ impl Piece {
             self.surface_time += 1;
             if self.surface_time > 1250 {
                     self.lock(m);
-                    self.new_piece();
                     self.surface_time = 0;
             }
             return true
@@ -159,7 +167,6 @@ impl Piece {
             self.origin -= 11;
         }
         self.lock(m);
-        self.new_piece();
     }
 
     pub fn can_move(&mut self, m: &mut Matrix, val: i32) -> bool {
