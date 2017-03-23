@@ -99,44 +99,36 @@ impl Piece {
     }
     pub fn rotate(&mut self, m: &mut Matrix, val: i32) {
         let old_orientation = self.orientation;
-        let new_orientation = (self.orientation + val as u32) % self.offset[self.orientation as usize].len() as u32;
+        self.orientation = (self.orientation + val as u32) % self.offset[self.orientation as usize].len() as u32;
         if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
             return
         }
         self.origin -= 1;
         if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
             return
         }
         self.origin += 2;
         if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
             return
         }
         self.origin -= 12;
         if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
             return
         }
         self.origin -= 1;
         if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
             return
         }
         self.origin += 2;
         if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
             return
         }
         self.origin += 8;
         if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
             return
         }
         self.origin += 4;
         if self.can_rotate(m, val) {
-            self.orientation = new_orientation;
             return
         }
         self.origin -= 2;
