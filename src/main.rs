@@ -82,15 +82,21 @@ impl App {
                 self.piece.mov_right = true;
             }
             Key::X => {
-                if !self.piece.rot_l {
-                    self.piece.rotate(true);
-                    self.piece.rot_l = true;
+                if !self.piece.rot {
+                    self.piece.rotate(&mut self.matrix, 1);
+                    self.piece.rot = true;
                 }
             }
             Key::Z => {
-                if !self.piece.rot_r {
-                    self.piece.rotate(false);
-                    self.piece.rot_r = true;
+                if !self.piece.rot {
+                    self.piece.rotate(&mut self.matrix, 3);
+                    self.piece.rot = true;
+                }
+            }
+            Key::C => {
+                if !self.piece.rot {
+                    self.piece.rotate(&mut self.matrix, 2);
+                    self.piece.rot = true;
                 }
             }
             Key::Space => {
@@ -114,10 +120,13 @@ impl App {
                 self.piece.mov_right = false;
             }
             Key::X => {
-                self.piece.rot_l = false;
+                self.piece.rot = false;
             }
             Key::Z => {
-                self.piece.rot_r = false;
+                self.piece.rot = false;
+            }
+            Key::C => {
+                self.piece.rot = false;
             }
             Key::Space => {
                 self.piece.hard_drop = false;

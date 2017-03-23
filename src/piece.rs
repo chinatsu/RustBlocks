@@ -57,8 +57,7 @@ pub struct Piece {
     pub offset: [[f64; 4];4],
     pub orientation: u32,
     pub color: [f32; 4],
-    pub rot_l: bool,
-    pub rot_r: bool,
+    pub rot: bool,
     pub soft_drop: bool,
     pub mov_left: bool,
     pub mov_right: bool,
@@ -73,8 +72,7 @@ impl Piece {
             offset: offsets,
             orientation: orientation,
             color: color,
-            rot_l: false,
-            rot_r: false,
+            rot: false,
             soft_drop: false,
             mov_left: false,
             mov_right: false,
@@ -99,13 +97,52 @@ impl Piece {
         m.clear_lines();
         self.new_piece();
     }
-    pub fn rotate(&mut self, cw: bool) {
-        if cw {
-            self.orientation = (self.orientation + 1) % self.offset[self.orientation as usize].len() as u32
-        } else {
-            self.orientation = (self.orientation + 3) % self.offset[self.orientation as usize].len() as u32
+    pub fn rotate(&mut self, m: &mut Matrix, val: i32) {
+        let old_orientation = self.orientation;
+        let new_orientation = (self.orientation + val as u32) % self.offset[self.orientation as usize].len() as u32;
+        if self.can_rotate(m, val) {
+            self.orientation = new_orientation;
+            return
         }
+        self.origin -= 1;
+        if self.can_rotate(m, val) {
+            self.orientation = new_orientation;
+            return
+        }
+        self.origin += 2;
+        if self.can_rotate(m, val) {
+            self.orientation = new_orientation;
+            return
+        }
+        self.origin -= 12;
+        if self.can_rotate(m, val) {
+            self.orientation = new_orientation;
+            return
+        }
+        self.origin -= 1;
+        if self.can_rotate(m, val) {
+            self.orientation = new_orientation;
+            return
+        }
+        self.origin += 2;
+        if self.can_rotate(m, val) {
+            self.orientation = new_orientation;
+            return
+        }
+        self.origin += 8;
+        if self.can_rotate(m, val) {
+            self.orientation = new_orientation;
+            return
+        }
+        self.origin += 4;
+        if self.can_rotate(m, val) {
+            self.orientation = new_orientation;
+            return
+        }
+        self.origin -= 2;
+        self.orientation = old_orientation;
     }
+
     pub fn move_down(&mut self, m: &mut Matrix) -> bool {
         if self.can_move(m, -11) {
             self.origin -= 11;

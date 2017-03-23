@@ -1,5 +1,5 @@
 [package]
-name = "RustBlocks"
+name = "rust_blocks"
 version = "0.1.0"
 authors = ["chinatsu <lolexplode@gmail.com>"]
 
