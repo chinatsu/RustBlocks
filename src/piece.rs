@@ -53,6 +53,7 @@ pub const PIECES: [[[f64; 4]; 4]; 7] = [PIECE_I, PIECE_O, PIECE_T, PIECE_S, PIEC
 
 pub struct Piece {
     pub id: u32,
+    pub index: usize,
     pub origin: u32,
     pub offset: [[f64; 4];4],
     pub orientation: u32,
@@ -63,13 +64,18 @@ pub struct Piece {
     pub mov_right: bool,
     pub hard_drop: bool,
     pub surface_time: u64,
-    pub drop_time: u64
+    pub drop_time: u64,
+    pub bag_index: usize,
+    pub next_index: usize,
+    pub bag: [usize; 7]
 }
 
 impl Piece {
     pub fn new(id: u32, orientation: u32, offsets: [[f64; 4]; 4], color: [f32; 4]) -> Piece {
-        Piece {
+        let mut result = Piece {
             id: id + 1,
+            index: id as usize,
+            next_index: 0,
             origin: SPAWN_POSITION,
             offset: offsets,
             orientation: orientation,
@@ -80,8 +86,18 @@ impl Piece {
             mov_right: false,
             hard_drop: false,
             surface_time: 0,
-            drop_time: 0
+            drop_time: 0,
+            bag_index: 0,
+            bag: [0, 1, 2, 3, 4, 5, 6]
+        };
+        let length = result.bag.len();
+        for _ in 0..length {
+            let n = rand::thread_rng().gen_range(0, length);
+            let tmp = result.bag[n];
+            result.bag[n] = result.bag[length - 1];
+            result.bag[length - 1] = tmp;
         }
+        result
     }
 
 
@@ -174,10 +190,25 @@ impl Piece {
     }
 
     pub fn new_piece(&mut self) {
+        self.bag_index += 1;
+        self.index = self.next_index;
+        self.next_index = rand::thread_rng().gen_range(0, self.bag.len());
         let pcs = &PIECES;
-        let choice = rand::thread_rng().gen_range(0, 7);
-        self.offset = pcs[choice];
-        self.id = choice as u32 + 1;
+        let length = self.bag.len();
+        if self.bag_index as usize >= self.bag.len() - 1 {
+            for _ in 0..length {
+                let n = rand::thread_rng().gen_range(0, length);
+                let tmp = self.bag[n];
+                self.bag[n] = self.bag[length - 1];
+                self.bag[length - 1] = tmp;
+            }
+            self.next_index = self.bag[0];
+            self.bag_index = 0;
+        } else {
+            self.next_index = self.bag[self.bag_index as usize + 1]
+        }
+        self.offset = pcs[self.index];
+        self.id = self.index as u32 + 1;
         self.origin = SPAWN_POSITION;
         self.orientation = 0;
     }

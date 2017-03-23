@@ -21,13 +21,15 @@ pub const SPAWN_POSITION: u32 = 281;
 pub const CELL_SIZE: u32 = 32;
 
 pub struct Matrix {
-    pub state: [i32; ARRAY_SIZE as usize]
+    pub state: [i32; ARRAY_SIZE as usize],
+    pub lines_cleared: u64,
 }
 
 impl Matrix {
     pub fn new() -> Matrix {
         let mut m = Matrix {
-            state: [0i32; ARRAY_SIZE as usize]
+            state: [0i32; ARRAY_SIZE as usize],
+            lines_cleared: 0
         };
         m.clear_matrix();
         m
@@ -43,6 +45,10 @@ impl Matrix {
         let mut i = TOP_ROW as usize;
         while i > 0 {
             if self.state[i] == -11 {
+                self.lines_cleared += 1;
+                if self.lines_cleared % 10 == 0 {
+                    println!("{} lines cleared", self.lines_cleared);
+                }
                 for j in i..TOP_ROW as usize {
                     self.state[j] = self.state[j + 11];
                 }
