@@ -36,8 +36,8 @@ impl App {
             }
             lines.push([0.0, (x*CELL_SIZE) as f64, args.width as f64, (x*CELL_SIZE) as f64]);
         }
-        let piece = &mut self.piece;
-
+        let ref mut piece = self.piece;
+        let ref mut matrix = self.matrix;
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
             clear(BG, gl);
@@ -47,14 +47,8 @@ impl App {
             for col in columns {
                 line(GREEN, 0.5, col, c.transform, gl);
             }
-            for i in 0..piece.size+1 {
-                //if piece.origin as f64 + piece.offset[piece.orientation as usize][i as usize] < 231.0 {
-                    let x = ((piece.origin as f64 + piece.offset[piece.orientation as usize][i as usize]) % REAL_WIDTH as f64).floor() * CELL_SIZE as f64;
-                    let y = (21.0 - ((piece.origin as f64 + piece.offset[piece.orientation as usize][i as usize]) / REAL_WIDTH as f64).floor()) * CELL_SIZE as f64;
-                    let s = rectangle::square(x, y, CELL_SIZE as f64);
-                    rectangle(piece.color, s, c.transform, gl);
-                //}
-            }
+            piece.draw(c, gl);
+            matrix.draw(c, gl);
 
         });
     }
@@ -62,7 +56,7 @@ impl App {
     fn update(&mut self, args: &UpdateArgs) {
 
         if self.piece.soft_drop {
-            self.piece.move_down()
+            self.piece.move_down(&mut self.matrix)
         }
         if self.piece.rot_l {
             self.piece.rotate(true);
@@ -71,12 +65,12 @@ impl App {
             self.piece.rotate(false);
         }
         if self.piece.mov_left {
-            if self.piece.can_move(&self.matrix, -1) {
+            if self.piece.can_move(&mut self.matrix, -1) {
                 self.piece.origin -= 1;
             }
         }
         if self.piece.mov_right {
-            if self.piece.can_move(&self.matrix, 1) {
+            if self.piece.can_move(&mut self.matrix, 1) {
                 self.piece.origin += 1;
             }
         }
@@ -131,7 +125,7 @@ fn main() {
     // Create an Glutin window.
     let mut window: Window = WindowSettings::new(
             "spinning-square",
-            [WIDTH*CELL_SIZE, HEIGHT*CELL_SIZE]
+            [REAL_WIDTH*CELL_SIZE, REAL_HEIGHT*CELL_SIZE]
         )
         .opengl(opengl)
         .exit_on_esc(true)
@@ -140,7 +134,7 @@ fn main() {
 
     let pcs = &PIECES;
     let choice = rand::thread_rng().choose(pcs).unwrap();
-    let p = Piece::new(0, 3, *choice, [1.0, 1.0, 1.0, 0.5]);
+    let p = Piece::new(0, *choice, [1.0, 1.0, 1.0, 0.5]);
     // Create a new game and run it.
     let mut app = App {
         gl: GlGraphics::new(opengl),
@@ -148,7 +142,7 @@ fn main() {
         matrix: Matrix::new()
     };
 
-    let mut events = Events::new(EventSettings::new()).ups(600);
+    let mut events = Events::new(EventSettings::new()).ups(10);
     while let Some(e) = events.next(&mut window) {
         if let Some(Button::Keyboard(key)) = e.press_args() {
             app.on_press(key);
