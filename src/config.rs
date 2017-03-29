@@ -9,7 +9,8 @@ pub struct Config {
 
 #[derive(RustcEncodable, RustcDecodable, Debug, Copy, Clone)]
 pub struct GameplayConfig {
-    pub das: u64
+    pub das: u64,
+    pub gravity: u64
 }
 
 #[derive(RustcEncodable, RustcDecodable, Debug, Copy, Clone)]
@@ -35,7 +36,8 @@ impl Default for Config {
 impl Default for GameplayConfig {
     fn default() -> GameplayConfig {
         GameplayConfig {
-            das: 15
+            das: 15,
+            gravity: 10
         }
     }
 }

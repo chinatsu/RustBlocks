@@ -63,14 +63,13 @@ pub const PENTA_I: [[f64; 5]; 4] = [
 
 pub const PIECES: [[[f64; 4]; 4]; 7] = [PIECE_I, PIECE_O, PIECE_T, PIECE_S, PIECE_Z, PIECE_J, PIECE_L];
 
-pub const PENTAS: [[[f64; 5]; 4]; 7] = [PENTA_I, PENTA_I, PENTA_I, PENTA_I, PENTA_I, PENTA_I, PENTA_I];
 
 pub struct Piece {
     pub config: Config,
     pub id: u32,
     pub index: usize,
     pub origin: u32,
-    pub offset: [[f64; 5];4],
+    pub offset: [[f64; 4];4],
     pub orientation: u32,
     pub color: [f32; 4],
     pub rot: bool,
@@ -86,7 +85,7 @@ pub struct Piece {
 }
 
 impl Piece {
-    pub fn new(id: u32, offsets: [[f64; 5]; 4]) -> Piece {
+    pub fn new(id: u32, offsets: [[f64; 4]; 4]) -> Piece {
         let mut result = Piece {
             config: ConfigFactory::load(Path::new("config.toml")),
             id: id + 1,
@@ -217,7 +216,7 @@ impl Piece {
         self.bag_index += 1;
         self.index = self.next_index;
         self.next_index = rand::thread_rng().gen_range(0, self.bag.len());
-        let pcs = &PENTAS;
+        let pcs = &PIECES;
         let length = self.bag.len();
         if self.bag_index as usize >= self.bag.len() - 1 {
             for _ in 0..length {

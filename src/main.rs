@@ -30,9 +30,9 @@ pub struct App {
     piece: Piece,
     matrix: Matrix,
     config: Config,
-    das_right: u64,
+    das: u64,
+    gravity: u64,
     moved_right: bool,
-    das_left: u64,
     moved_left: bool,
     time: f64,
     glyphs: GlyphCache<'static>
@@ -88,7 +88,12 @@ impl App {
     }
 
     fn update(&mut self, args: &UpdateArgs) {
+        self.gravity += 1;
 
+        if self.gravity % self.config.gameplay.gravity == 0 {
+            self.gravity = 0;
+            let _ = self.piece.move_down(&mut self.matrix);
+        }
         if self.piece.soft_drop {
             let _ = self.piece.move_down(&mut self.matrix);
         }
@@ -99,8 +104,8 @@ impl App {
                 }
                 self.moved_left = true;
             }
-            self.das_left += 1;
-            if self.das_left > self.config.gameplay.das {
+            self.das += 1;
+            if self.das > self.config.gameplay.das {
                 if self.piece.can_move(&mut self.matrix, -1) {
                     self.piece.origin -= 1;
                 }
@@ -113,8 +118,8 @@ impl App {
                 }
                 self.moved_right = true;
             }
-            self.das_right += 1;
-            if self.das_right > self.config.gameplay.das {
+            self.das += 1;
+            if self.das > self.config.gameplay.das {
                 if self.piece.can_move(&mut self.matrix, 1) {
                     self.piece.origin += 1;
                 }
@@ -130,12 +135,14 @@ impl App {
             Key::Left => {
                 if self.piece.mov_right == true {
                     self.piece.mov_right == false;
+                    self.das = 0;
                 }
                 self.piece.mov_left = true;
             }
             Key::Right => {
                 if self.piece.mov_left == true {
                     self.piece.mov_left == false;
+                    self.das = 0;
                 }
                 self.piece.mov_right = true;
             }
@@ -173,12 +180,12 @@ impl App {
             }
             Key::Left => {
                 self.piece.mov_left = false;
-                self.das_left = 0;
+                self.das = 0;
                 self.moved_left = false;
             }
             Key::Right => {
                 self.piece.mov_right = false;
-                self.das_right = 0;
+                self.das = 0;
                 self.moved_right = false;
             }
             Key::X => {
@@ -216,7 +223,7 @@ fn main() {
                 .for_folder("assets").unwrap();
     let ref font = assets.join("FiraMono-Regular.ttf");
 
-    let pcs = &PENTAS;
+    let pcs = &PIECES;
     let choice = rand::thread_rng().gen_range(0, 7);
     let p = Piece::new(choice, pcs[choice as usize]);
     let mut app = App {
@@ -224,9 +231,9 @@ fn main() {
         piece: p,
         matrix: Matrix::new(),
         config: ConfigFactory::load(Path::new("config.toml")),
-        das_right: 0,
+        das: 0,
+        gravity: 0,
         moved_right: false,
-        das_left: 0,
         moved_left: false,
         time: 0.0,
         glyphs: GlyphCache::new(font).unwrap()

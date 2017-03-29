@@ -1,5 +1,6 @@
 [gameplay]
 das = 10
+gravity = 10
 
 [orientations]
 i = 0

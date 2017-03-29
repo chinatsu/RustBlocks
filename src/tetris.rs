@@ -4,7 +4,7 @@ use graphics::*;
 use piece::*;
 
 
-pub const WIDTH: u32 = 15;
+pub const WIDTH: u32 = 10;
 pub const HEIGHT: u32 = 20;
 pub const HIDDEN: u32 = 5;
 pub const REAL_WIDTH: u32 = WIDTH + 1;
