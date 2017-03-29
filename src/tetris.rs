@@ -4,7 +4,7 @@ use graphics::*;
 use piece::*;
 
 
-pub const WIDTH: u32 = 10;
+pub const WIDTH: u32 = 15;
 pub const HEIGHT: u32 = 20;
 pub const HIDDEN: u32 = 5;
 pub const REAL_WIDTH: u32 = WIDTH + 1;
@@ -13,7 +13,7 @@ pub const REAL_HEIGHT: u32 = HEIGHT + HIDDEN + 2;
 pub const ARRAY_SIZE: u32 = REAL_WIDTH * REAL_HEIGHT;
 pub const TOP_ROW: u32 = ARRAY_SIZE - REAL_WIDTH;
 
-pub const CENTER_COLUMN: u32 = 5;
+pub const CENTER_COLUMN: u32 = 6;
 pub const CENTER_TOP_ROW: u32 = TOP_ROW - CENTER_COLUMN;
 
 pub const SPAWN_POSITION: u32 = 281;
@@ -44,13 +44,10 @@ impl Matrix {
     pub fn clear_lines(&mut self) {
         let mut i = TOP_ROW as usize;
         while i > 0 {
-            if self.state[i] == -11 {
+            if self.state[i] == -(REAL_WIDTH as i32) {
                 self.lines_cleared += 1;
-                if self.lines_cleared % 10 == 0 {
-                    println!("{} lines cleared", self.lines_cleared);
-                }
                 for j in i..TOP_ROW as usize {
-                    self.state[j] = self.state[j + 11];
+                    self.state[j] = self.state[j + REAL_WIDTH as usize];
                 }
                 if self.state[TOP_ROW as usize] != -1 {
                     self.state[TOP_ROW as usize] = -1;
